@@ -23,16 +23,40 @@ a:hover {
 }
 
 body {
-  margin: 0;
+  margin: 2rem;
   display: flex;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #f4f4f4;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+main {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input, select, button {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+#courseList {
+  margin-top: 2rem;
 }
 
 #app {
@@ -81,6 +105,7 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
 
 @media (prefers-color-scheme: light) {
   :root {
