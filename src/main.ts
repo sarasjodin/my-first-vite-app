@@ -1,87 +1,119 @@
+// Importerar global CSS och typer för kurser
 import './style.css';
-/* import typescriptLogo from './typescript.svg';
-import viteLogo from '/vite.svg';
-import { setupCounter } from './counter.ts'; */
 import { CourseInfo } from './types';
+import { fetchCourses } from './api';
+import { renderCourses } from './ui';
+import { saveToLocalStorage } from './storage';
+import { loadFromLocalStorage } from './storage';
+import { showStatus } from './ui';
 
-const courseList = document.getElementById('courseList') as HTMLElement;
-const form = document.getElementById('courseForm') as HTMLFormElement;
+// Ref till formulär och kurslistan i DOM
+// Kanske returnerar null särav "as HTMLFormElement" (sist)
+const form = document.getElementById('course-form') as HTMLFormElement;
+const courseList = document.getElementById('course-list') as HTMLElement;
 
+// Kurslistan är en array med typ CourseInfo
 let courses: CourseInfo[] = [];
 
-async function fetchCourses(): Promise<CourseInfo[]> {
-  try {
-    const res = await fetch(
-      'https://webbutveckling.miun.se/files/ramschema_ht24.json'
-    );
-    if (!res.ok) throw new Error('URL misslyckades');
-    return await res.json();
-  } catch {
-    // Fallback till lokal JSON i public-mappen
-    const localRes = await fetch('/ramschema_ht24.json');
-    return await localRes.json();
+// Borde returnera null därav "as HTMLFormElement" (sist)
+const clearBtn = document.getElementById('clear-storage') as HTMLButtonElement;
+
+clearBtn.addEventListener('click', (e: MouseEvent): void => {
+  e.preventDefault();
+  if (confirm('Är du säker på att du vill rensa alla sparade kurser?')) {
+    localStorage.removeItem('courses');
+    console.log('Kurser rensas och laddar om...');
+    showStatus('Kurser rensas och laddar om...', 'info');
+
+    setTimeout(() => {
+      location.reload();
+    }, 1000); // Vänta lite för att visa status först
   }
-}
+});
 
-function loadFromLocalStorage(): CourseInfo[] | null {
-  const stored = localStorage.getItem('courses');
-  return stored ? JSON.parse(stored) : null;
-}
-
-function saveToLocalStorage(): void {
-  localStorage.setItem('courses', JSON.stringify(courses));
-}
-
-function renderCourses(): void {
-  courseList.innerHTML = '';
-  courses.forEach((course) => {
-    const item = document.createElement('article');
-    item.innerHTML = `
-      <h3>${course.code} - ${course.coursename}</h3>
-      <p>Progression: ${course.progression}</p>
-      <a href="${course.syllabus}" target="_blank">Kursplan</a>
-    `;
-    courseList.appendChild(item);
-  });
-}
-
-form.addEventListener('submit', (e) => {
+// Lyssnar på formulärets submit
+// Validerar formuläret och lägger till ett kursobjekt
+form.addEventListener('submit', (e: SubmitEvent): void => {
   e.preventDefault();
 
-  const code = (
-    document.getElementById('code') as HTMLInputElement
-  ).value.trim();
-  const coursename = (
-    document.getElementById('coursename') as HTMLInputElement
-  ).value.trim();
-  const progression = (
-    document.getElementById('progression') as HTMLSelectElement
-  ).value as 'A' | 'B' | 'C';
-  const syllabus = (
-    document.getElementById('syllabus') as HTMLInputElement
-  ).value.trim();
+  const codeInput = document.getElementById('code') as HTMLInputElement | null;
+  const nameInput = document.getElementById(
+    'course-name'
+  ) as HTMLInputElement | null;
+  const progressionSelect = document.getElementById(
+    'progression'
+  ) as HTMLSelectElement | null;
+  const syllabusInput = document.getElementById(
+    'syllabus'
+  ) as HTMLInputElement | null;
 
-  if (courses.some((c) => c.code.toLowerCase() === code.toLowerCase())) {
-    alert('Kurskoden finns redan!');
+  // Ser till att alla fält är tillgängliga i DOM:en innan de används
+  if (!codeInput || !nameInput || !progressionSelect || !syllabusInput) {
     return;
   }
 
+  // Ser till att kurskoden visas i versaler
+  const code: string = codeInput.value.trim().toUpperCase();
+  const coursename: string = nameInput.value.trim();
+  const progression = progressionSelect.value as 'A' | 'B' | 'C';
+  const syllabus:string = syllabusInput.value.trim();
+
+  // Förhindrar dubbletter baserat på kurskod (case-insensitive jämförelse)
+  if (courses.some((c) => c.code.toUpperCase() === code.toUpperCase())) {
+    console.log('Kurskoden finns redan, ingen kurs har blivit tillagd');
+    showStatus(
+      'Kurskoden finns redan. Ingen kurs har blivit tillagd.',
+      'warning'
+    );
+    return;
+  }
+
+  // Lägger till ny kurs som sparas lokalt och visas i gränssnittet
   const newCourse: CourseInfo = { code, coursename, progression, syllabus };
   courses.push(newCourse);
-  saveToLocalStorage();
-  renderCourses();
+  console.log('Ny kurs har blivit tillagd');
+  showStatus('Ny kurs har blivit tillagd', 'info');
+  saveToLocalStorage(courses); // Skickar med aktuell lista (data) för att spara
+  console.log('Ny kurs har sparats till localStorage');
+  showStatus('Ny kurs har sparats till local storage', 'info');
+  renderCourses(courses, courseList); // Skickar med data + DOM-element för att visa
+  console.log('Ny kurs visas');
+  showStatus('Ny kurs visas', 'info');
   form.reset();
 });
 
+/**
+ * Startfunktion som körs när sidan laddas
+ * Försöker först läsa lokalt sparad data – annars hämtas den från nätet
+ * Kurserna renderas till sidan
+ */
 async function init(): Promise<void> {
-  const local = loadFromLocalStorage();
-  if (local) {
-    courses = local;
-  } else {
-    courses = await fetchCourses();
-    saveToLocalStorage(); // Sparar så vi slipper hämta igen
+  console.log('Init startar');
+
+  try {
+    const local: CourseInfo[] = loadFromLocalStorage();
+
+    if (local.length) {
+      // Det finns redan sparade kurser i localStorage
+      console.log('Data från localStorage');
+      showStatus('Kurser inlästa från localStorage', 'info');
+      courses = local;
+      console.log('Kurser inlästa', courses);
+      showStatus(`Kurser inlästa (${courses.length})`, 'info');
+    } else {
+      // Inga sparade kurser – hämta från fil/API
+      courses = await fetchCourses();
+      saveToLocalStorage(courses);
+      console.log('Kurser hämtade och sparade till local storage');
+      showStatus('Kurser sparade till local storage', 'info');
+    }
+    console.log('Renderar...');
+    renderCourses(courses, courseList);
+  } catch (error) {
+    console.error('Ett fel inträffade i init:', error);
+    showStatus('Kunde inte initiera appen', 'error');
   }
-  renderCourses();
 }
 
+// Initierar startfunktionen
 init();

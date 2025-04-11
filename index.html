@@ -5,19 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kurshanterare med Vite & TS</title>
+    <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-
     <main>
       <h1>Kurshanterare</h1>
 
-      <form id="courseForm">
+      <form id="course-form">
         <input type="text" id="code" placeholder="Kurskod" required />
-        <input type="text" id="coursename" placeholder="Kursnamn" required />
-        <select id="progression" required>
-          <option value="">Progression</option>
+        <input type="text" id="course-name" placeholder="Kursnamn" required />
+        <label for="progression">Progression:</label>
+        <select id="progression" name="progression">
           <option value="A">A</option>
           <option value="B">B</option>
           <option value="C">C</option>
@@ -28,10 +26,15 @@
           placeholder="Länk till kursplan"
           required
         />
-        <button type="submit">Lägg till kurs</button>
+        <div class="button-row">
+          <button id="clear-storage" class="button secondary" type="button">
+            Rensa sparade kurser
+          </button>
+          <button class="button primary" type="submit">Lägg till kurs</button>
+        </div>
+        <div id="status" class="status"></div>
       </form>
-
-      <section id="courseList"></section>
+      <section id="course-list"></section>
     </main>
   </body>
 </html>
