@@ -1,6 +1,6 @@
 # my-first-vite-app
 <a href="https://a-course-handler-app.netlify.app/" target="_blank" rel="noopener noreferrer">
-Open Live Demo in new tab
+Open Live Demo
 </a> <br><br>
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/c432a77f-e55d-4649-8c47-bc2cd3e3eb59/deploy-status)](https://app.netlify.com/projects/a-course-handler-app/deploys)
