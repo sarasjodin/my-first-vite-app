@@ -1,6 +1,7 @@
 # my-first-vite-app
+https://a-course-handler-app.netlify.app/<br><br>
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c432a77f-e55d-4649-8c47-bc2cd3e3eb59/deploy-status)](https://app.netlify.com/projects/a-course-handler-app/deploys)<br>
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/c432a77f-e55d-4649-8c47-bc2cd3e3eb59/deploy-status)](https://app.netlify.com/projects/a-course-handler-app/deploys)
 
 ## Features
 
