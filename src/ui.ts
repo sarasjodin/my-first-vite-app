@@ -14,12 +14,23 @@ export function renderCourses(
   container.innerHTML = '';
 
   courses.forEach((course) => {
-    const item: HTMLElement = document.createElement('article');
-    item.innerHTML = `
-      <h3>${course.code} - ${course.coursename}</h3>
-      <p>Progression: ${course.progression}</p>
-      <a href="${course.syllabus}" target="_blank" rel="noopener noreferrer">Kursplan</a>
-    `;
+    const item = document.createElement('article');
+
+    const heading = document.createElement('h3');
+    heading.textContent = `${course.code} - ${course.coursename}`;
+
+    const progress = document.createElement('p');
+    progress.textContent = `Progression: ${course.progression}`;
+
+    const link = document.createElement('a');
+    link.href = course.syllabus;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = 'Kursplan';
+
+    item.appendChild(heading);
+    item.appendChild(progress);
+    item.appendChild(link);
     container.appendChild(item);
   });
 }
