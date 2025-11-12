@@ -23,7 +23,13 @@ export function renderCourses(
     progress.textContent = `Progression: ${course.progression}`;
 
     const link = document.createElement('a');
-    link.href = course.syllabus;
+    const safeHref = safeUrl(course.syllabus);
+    if (safeHref) {
+      link.href = safeHref;
+    } else {
+      link.removeAttribute('href');
+      link.textContent = 'Ogiltig kurslänk';
+    }
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.textContent = 'Kursplan';
@@ -55,4 +61,17 @@ export function showStatus(
     statusEl.textContent = '';
     statusEl.className = 'status';
   }, duration);
+}
+
+function safeUrl(input: string): string | null {
+  try {
+    const url = new URL(input, window.location.origin);
+    const protocol = url.protocol.toLowerCase();
+    if (protocol === 'http:' || protocol === 'https:') {
+      return url.href;
+    }
+  } catch {
+    console.warn('Ogiltig URL i safeUrl:', input);
+  }
+  return null;
 }
